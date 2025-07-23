@@ -1,0 +1,4 @@
+NAME: CustomData
+DATA_PATH: data/custom_data
+UNIFORM: TRUE
+USE_NORMALS: FALSE

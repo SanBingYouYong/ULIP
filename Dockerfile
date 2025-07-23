@@ -54,6 +54,13 @@ COPY requirements.txt .
 # for this specific RUN command.
 RUN bash -c "source /opt/conda/etc/profile.d/conda.sh && conda activate ulip && pip install --no-cache-dir -r requirements.txt"
 
+# additional dependencies I found...
+RUN pip install --upgrade https://github.com/unlimblue/KNN_CUDA/releases/download/0.2/KNN_CUDA-0.2-py3-none-any.whl && \
+    pip install Ninja
+
+# Copy the application code into the container's working directory.
+COPY . /app
+
 # The SHELL instruction is still useful for subsequent RUN commands if you add more.
 # However, for interactive entry, we'll handle activation in CMD.
 SHELL ["/bin/bash", "-c"]

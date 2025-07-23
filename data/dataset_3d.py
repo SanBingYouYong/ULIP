@@ -24,6 +24,16 @@ from tqdm import tqdm
 import pickle
 from PIL import Image
 
+# EDIT
+import open3d as o3d
+def save_pc(points, fname):
+    if points.shape[1] > 3:
+        points = points[:,:3]
+
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(points)
+    o3d.io.write_point_cloud(fname, pcd)
+
 def pil_loader(path):
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
     with open(path, 'rb') as f:
@@ -156,6 +166,103 @@ import os, sys, h5py
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
+
+# EDIT
+@DATASETS.register_module()
+class CustomData(data.Dataset):
+    def __init__(self, config):
+        self.root = config.DATA_PATH
+        self.npoints = config.npoints
+        self.uniform = config.UNIFORM
+        # Accepted 3D formats (expand the load_3d_models() function to add more)
+        self.extensions = ('.txt', '.ply', '.obj')
+
+        # Create a different .dat file if FPS down-sampling is used (optional)
+        if self.uniform:
+            self.save_path = os.path.join(self.root, 'customdata_%dpts_fps.dat' % (self.npoints))
+        else:
+            self.save_path = os.path.join(self.root, 'customdata.dat')
+
+        # Generate the .dat file if not existing
+        if not os.path.exists(self.save_path):
+            print_log('Processing data %s (only running in the first time)...' % self.save_path, logger='CustomData')
+
+            # List all 3D models from the root/split folder
+            try:
+                self.datapath = [f for f in os.listdir(os.path.join(self.root, "data")) if f.lower().endswith(self.extensions)]
+            except:
+                raise FileNotFoundError("No data folder found. Add some data before processing.")
+            print_log('The dataset contains %d models' % (len(self.datapath)), logger='CustomData')
+
+            # No labels expected, so this dataset class only stores model filenames and the 3D points 
+            self.list_of_points = [None] * len(self.datapath)
+            self.list_of_names = [None] * len(self.datapath)
+
+            # Load every model in the data folder one at a time
+            for index in tqdm(range(len(self.datapath)), total=len(self.datapath)):
+                file_path = os.path.join(self.root, "data", self.datapath[index])
+                point_set = self.load_3d_models(file_path)
+
+                # Sanity check
+                if not isinstance(point_set, np.ndarray) or point_set.ndim != 2 or point_set.shape[1] < 3:
+                    print_log(f"Skipping invalid point cloud: {file_path} (Invalid shape: {point_set.shape})", logger='CustomData')
+                    continue
+
+                if point_set.shape[0] > self.npoints:
+                    if self.uniform:
+                        point_set = farthest_point_sample(point_set, self.npoints)
+                    else:
+                        point_set = point_set[0:self.npoints,:]
+                self.list_of_points[index] = point_set[0:self.npoints,:]
+                self.list_of_names[index] = self.datapath[index]
+
+            # Export the dataset as a dictionary 
+            with open(self.save_path, 'wb') as f:
+                pickle.dump({
+                    'points': self.list_of_points,
+                    'names': self.list_of_names
+                    }, f)
+
+        # If the dat file already exists, read it
+        else:
+            print_log('Load processed data from %s...' % self.save_path, logger='CustomData')
+            with open(self.save_path, 'rb') as f:
+                data = pickle.load(f)
+                self.list_of_points = data['points']
+                self.list_of_names = data.get('names', None)
+
+        print_log(f"Loaded {len(self.list_of_points)} point clouds. Shape of first: {self.list_of_points[0].shape}", logger='CustomData')
+
+    # Custom method to load individual 3D models   
+    def load_3d_models(self, file_path):
+        ext = os.path.splitext(file_path)[1].lower()
+
+        if ext == '.txt':
+            return loadtxt(file_path, dtype=np.float32)
+        elif ext == '.npy':
+            return np.load(file_path)
+        elif ext == '.ply':
+            pcd = o3d.io.read_point_cloud(file_path)
+            return np.asarray(pcd.points)
+        elif ext == '.obj':
+            points = []
+            with open(file_path, 'r') as f:
+                for line in f:
+                    if line.startswith('v '):
+                        parts = line.strip().split()
+                        point = list(map(float, parts[1:4]))
+                        points.append(point)
+            return np.array(points, dtype=np.float32)
+        else:
+            raise ValueError(f"Unsupported file extension: {ext}")
+
+    def __len__(self):
+        return len(self.list_of_points)
+
+    def __getitem__(self, idx):
+        point_set = torch.from_numpy(self.list_of_points[idx]).float()
+        return point_set, self.list_of_names[idx]
+
 
 @DATASETS.register_module()
 class ModelNet(data.Dataset):

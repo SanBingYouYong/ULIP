@@ -1,4 +1,10 @@
 {
+    "customdata": {
+        "config":"./data/CustomData.yaml",
+        "train":"train",
+        "test":"test",
+        "usage": "test"
+    },
     "shapenet": {
         "config": "./data/ShapeNet-55.yaml",
         "train": "train",
