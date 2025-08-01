@@ -472,7 +472,7 @@ def test_zeroshot_3d(args):
     return results
 
 def test_zeroshot_3d_ulip2(args):
-    ckpt = torch.load(args.test_ckpt_addr, map_location='cpu')
+    ckpt = torch.load(args.test_ckpt_addr, map_location='cpu', weights_only=False)
     state_dict = OrderedDict()
     for k, v in ckpt['state_dict'].items():
         state_dict[k.replace('module.', '')] = v

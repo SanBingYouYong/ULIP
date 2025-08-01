@@ -33,5 +33,5 @@ COPY . /app
 ENV TORCH_CUDA_ARCH_LIST="10.0 12.0"
 
 # to get pointnet2_batch_cuda
-RUN cd models/pointnet2/PointNeXt/openpoints/cpp/pointnet2_batch && \
+RUN cd models/pointnext/PointNeXt/openpoints/cpp/pointnet2_batch && \
     python setup.py install
