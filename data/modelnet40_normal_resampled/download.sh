@@ -1,0 +1,14 @@
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet10_test_1024pts.dat
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet10_test_1024pts_fps.dat
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet10_train_1024pts.dat
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet10_train_1024pts_fps.dat
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet40_shape_names.txt
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet40_shape_names_modified.txt
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet40_test.txt
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet40_test_1024pts.dat
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet40_test_1024pts_fps.dat
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet40_test_8192pts_fps.dat
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet40_train.txt
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet40_train_1024pts.dat
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet40_train_1024pts_fps.dat
+wget https://huggingface.co/datasets/SFXX/ulip/resolve/main/ULIP-1/modelnet40_normal_resampled/modelnet40_train_8192pts_fps.dat
