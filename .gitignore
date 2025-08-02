@@ -1,3 +1,5 @@
 *.bin
 *.pt
 *.obj
+*.tar
+*.tar.gz
