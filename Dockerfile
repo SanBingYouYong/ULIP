@@ -27,11 +27,14 @@ RUN pip install torch torchvision torchaudio --index-url https://download.pytorc
 
 RUN pip install --no-cache-dir multimethod shortuuid
 
+ENV TORCH_CUDA_ARCH_LIST="10.0 12.0"
+
+
 # Copy the application code into the container's working directory.
 COPY . /app
 
-ENV TORCH_CUDA_ARCH_LIST="10.0 12.0"
-
-# to get pointnet2_batch_cuda
+# to get pointnet2_batch_cuda  # again, copied PointNeXt from pointnext into pointnet2 due to wrong references
 RUN cd models/pointnext/PointNeXt/openpoints/cpp/pointnet2_batch && \
     python setup.py install
+
+RUN apt-get update && apt-get install nano

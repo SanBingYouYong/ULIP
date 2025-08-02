@@ -317,3 +317,43 @@ class PointNetFeaturePropagation(nn.Module):
             bn = self.mlp_bns[i]
             new_points = F.relu(bn(conv(new_points)))
         return new_points
+
+# again, copied from pointnext
+from torch.autograd import Function
+# from .PointNeXt.openpoints.cpp import pointnet2_cuda
+from ..pointnext.PointNeXt.openpoints.cpp import pointnet2_cuda
+class GatherOperation(Function):
+
+    @staticmethod
+    def forward(ctx, features: torch.Tensor, idx: torch.Tensor) -> torch.Tensor:
+        """
+        :param ctx:
+        :param features: (B, C, N)
+        :param idx: (B, npoint) index tensor of the features to gather
+        :return:
+            output: (B, C, npoint)
+        """
+        assert features.is_contiguous()
+        assert idx.is_contiguous()
+
+        B, npoint = idx.size()
+        _, C, N = features.size()
+        output = torch.cuda.FloatTensor(B, C, npoint, device=features.device)
+
+        pointnet2_cuda.gather_points_wrapper(B, C, N, npoint, features, idx.int(), output)
+
+        ctx.for_backwards = (idx, C, N)
+        return output
+
+    @staticmethod
+    def backward(ctx, grad_out):
+        idx, C, N = ctx.for_backwards
+        B, npoint = idx.size()
+
+        grad_features = torch.zeros([B, C, N], dtype=torch.float, device=grad_out.device, requires_grad=True)
+        grad_out_data = grad_out.data.contiguous()
+        pointnet2_cuda.gather_points_grad_wrapper(B, C, N, npoint, grad_out_data, idx.int(), grad_features.data)
+        return grad_features, None
+
+
+gather_operation = GatherOperation.apply
