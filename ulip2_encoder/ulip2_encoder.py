@@ -108,6 +108,9 @@ class OBJProcessor:
             # Return a default point cloud if loading fails
             default_points = np.random.randn(self.num_points, 3) * 0.1
             default_points = pc_normalize(default_points)
+            # Add dummy RGB channels (0.5, 0.5, 0.5) for gray
+            dummy_rgb = np.full((self.num_points, 3), 0.5)
+            default_points = np.concatenate([default_points, dummy_rgb], axis=1)
             return default_points
     
     def load_pointcloud_file(self, pc_path: str) -> np.ndarray:
@@ -158,6 +161,9 @@ class OBJProcessor:
             # Return default point cloud
             default_points = np.random.randn(self.num_points, 3) * 0.1
             default_points = pc_normalize(default_points)
+            # Add dummy RGB channels (0.5, 0.5, 0.5) for gray
+            dummy_rgb = np.full((self.num_points, 3), 0.5)
+            default_points = np.concatenate([default_points, dummy_rgb], axis=1)
             return default_points
 
 
@@ -223,7 +229,10 @@ class ULIP2Encoder:
         if points.shape[1] >= 6:
             points = points[:, :6]  # XYZRGB
         else:
-            points = points[:, :3]  # XYZ only
+            # XYZ only - add dummy RGB channels (0.5, 0.5, 0.5) for gray
+            points_xyz = points[:, :3]
+            dummy_rgb = np.full((points_xyz.shape[0], 3), 0.5, dtype=points_xyz.dtype)
+            points = np.concatenate([points_xyz, dummy_rgb], axis=1)
         
         # Convert to tensor
         pc_tensor = torch.from_numpy(points).float().unsqueeze(0).to(self.device)
@@ -247,6 +256,10 @@ class ULIP2Encoder:
         """
         # Tokenize text
         text_tokens = self.tokenizer([text]).to(self.device)
+        
+        # Ensure correct tensor shape - add batch dimension if needed
+        if len(text_tokens.shape) < 2:
+            text_tokens = text_tokens[None, ...]
         
         with torch.no_grad():
             # Encode text
