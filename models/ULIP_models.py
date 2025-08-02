@@ -352,7 +352,7 @@ def ULIP_PointBERT(args):
 def ULIP2_PointBERT_Colored(args):
     print("Get openclip model:")
     open_clip_model, _, preprocess = open_clip.create_model_and_transforms('ViT-bigG-14',
-                                                                          pretrained='laion2b_s39b_b160k')
+                                                                          pretrained='ulip_models/open_clip_pytorch_model.bin')
     open_clip_model.eval()
     print("Finished loading the openclip model.")
 
