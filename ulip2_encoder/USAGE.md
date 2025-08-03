@@ -1,5 +1,21 @@
 # ULIP2 Encoder - Usage Guide
 
+## Quick Start
+
+Encode a directory of point clouds to embeddings: 
+- `python ulip2_encoder/encode_shapenet.py --input_dir shapenet/shapenet_pc --output_dir shapenet/shapenet_embedding/ --batch_size 100`
+    - use `docker cp pc.tar <container_id>:/app/<input_dir>` to copy paste your point clouds
+    - use `tar -xvf pc.tar -C <input_dir>` inside container to extract point clouds
+    - `tar -czf emb.tar.gz <output_dir>` to pack up (not tested)
+        - `apt update && apt install zip` and 
+        - `zip -r shapenet_embedding.zip shapenet_embedding/` (tested)
+
+Compare OBJ and text embedding similarity with point cloud sampled from .obj file:
+- `python ulip2_encoder/ulip2_encoder.py --obj_file data/custom_data/data/camera.obj --text "camera" --compare`
+
+Just encode a point cloud:
+- `python ulip2_encoder/ulip2_encoder.py --obj_file data/custom_data/data/camera.obj` creates a .npy file with the same name
+
 ## Running from Main ULIP Directory
 
 All commands should be run from the main ULIP directory (where main.py is located).
